@@ -175,7 +175,7 @@ export function renderQuestion(question, itemIndex = 0) {
     const qid = escapeHtml(question.id);
     const h = HEADINGS.question;
     return `<section class="q" data-qid="${qid}">`
-        + `<h2>${escapeHtml(question.title)}<span class="tag warn">回答が必要</span></h2>`
+        + `<h2>${escapeHtml(question.title)}</h2>`
         + renderBlock(h.decide, renderText(question.decide.text))
         + renderBlock(h.current, renderCurrent(question.current))
         + renderBlock(h.problem, renderProblem(question.problem, itemIndex))
@@ -207,7 +207,7 @@ export function renderDiscussion(item, itemIndex = 0) {
     const topicQuestions = `<p class="fld"><span class="lbl">${LABELS.topicQuestions}</span></p><ol class="topics">`
         + item.topic.questions.map((question) => `<li>${escapeHtml(question)}</li>`).join('') + '</ol>';
     return `<section class="q" data-qid="${qid}">`
-        + `<h2>${escapeHtml(item.title)}<span class="tag warn">回答が必要</span></h2>`
+        + `<h2>${escapeHtml(item.title)}</h2>`
         + renderBlock(h.topic, topicQuestions + renderText(item.topic.text))
         + renderBlock(h.current, renderCurrent(item.current))
         + renderBlock(h.problem, renderProblem(item.problem, itemIndex))
@@ -322,7 +322,6 @@ export function buildReportHtml(report, kind, { saveTo } = {}) {
     html = replaceMarker(html, '<!--ASKUI_FRAME-->', frame);
     html = replaceMarker(html, '<!--ASKUI_CHECKED-->', settings.defaultSave ? ' checked' : '');
     html = replaceMarker(html, '<!--ASKUI_SAVE_LABEL-->', settings.saveLabel);
-    html = replaceMarker(html, '<!--ASKUI_DEFAULT_TEXT-->', settings.defaultSave ? '既定: チェックあり' : '既定: チェックなし');
     html = replaceMarker(html, '<!--ASKUI_SAVE_TO-->', renderSaveTo(saveTo));
     html = replaceMarker(html, '/*ASKUI_META*/', toSafeJson({ defaultSave: settings.defaultSave }));
     return html;

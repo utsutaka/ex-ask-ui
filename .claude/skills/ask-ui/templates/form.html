@@ -34,7 +34,7 @@ main { max-width: 1000px; margin: 0 auto; }
     padding: 20px 20px 16px;
     margin: 0 0 20px;
 }
-.q h2 { margin: 0 0 4px; font-size: 1.2rem; line-height: 1.5; }
+.q h2 { margin: 0 0 8px; font-size: 1.4rem; line-height: 1.4; }
 .tag {
     display: inline-block;
     margin-left: 8px;
@@ -47,9 +47,8 @@ main { max-width: 1000px; margin: 0 auto; }
     font-weight: 600;
     vertical-align: middle;
 }
-.tag.warn { border-color: var(--danger); color: var(--danger); background: var(--danger-soft); }
-.blk { margin: 14px 0; }
-.blk h3 { margin: 0 0 4px; font-size: 0.95rem; color: var(--accent); }
+.blk { margin: 14px 0 0; padding-top: 10px; border-top: 1px solid var(--line); }
+.blk h3 { margin: 0 0 4px; font-size: 1.05rem; color: var(--accent); }
 .blk p { margin: 0; white-space: pre-line; }
 .blk p.fld { margin: 0 0 6px; }
 .blk p.fld.orig { padding-left: 10px; border-left: 3px solid var(--line); color: var(--muted); white-space: pre-wrap; }
@@ -64,8 +63,8 @@ ol.topics { margin: 0 0 6px; padding-left: 1.4em; }
 figure.exh { margin: 12px 0; padding: 0; overflow-x: auto; }
 figure.exh figcaption { margin-bottom: 4px; color: var(--muted); font-size: 0.9rem; }
 figure.exh iframe { display: block; width: 100%; height: 120px; border: 1px solid var(--line); background: #fff; }
-fieldset.opts { border: 0; margin: 12px 0 0; padding: 0; }
-fieldset.opts legend { padding: 0; margin-bottom: 6px; font-weight: 600; color: var(--accent); font-size: 0.95rem; }
+fieldset.opts { border: 0; border-top: 1px solid var(--line); margin: 14px 0 0; padding: 10px 0 0; }
+fieldset.opts legend { padding: 0; margin-bottom: 6px; font-weight: 600; color: var(--accent); font-size: 1.05rem; }
 label.opt {
     display: block;
     margin: 0 0 8px;
@@ -137,7 +136,6 @@ button#send:disabled { background: var(--muted); cursor: default; }
 <!--ASKUI_QUESTIONS-->
 <div class="actions">
     <label class="save"><input type="checkbox" id="save" data-askui-control><!--ASKUI_SAVE_LABEL--></label>
-    <span class="note">既定: チェックなし</span>
     <!--ASKUI_SAVE_TO-->
     <button type="submit" id="send" data-askui-control>送信</button>
     <span id="form-msg" role="status"></span>
