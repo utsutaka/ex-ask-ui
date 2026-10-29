@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><!--ASKUI_PAGE_TITLE--></title>
+<style>
+:root {
+    --paper: #f6f7f9;
+    --card: #ffffff;
+    --ink: #1c2430;
+    --muted: #4d5968;
+    --line: #c9d0d9;
+    --accent: #0b5a8a;
+    --accent-soft: #e3f0f8;
+    --danger: #a3261d;
+    --danger-soft: #fbe9e7;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    padding: 24px 16px 48px;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Yu Gothic UI", "Hiragino Sans", "Meiryo", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+}
+main { max-width: 1000px; margin: 0 auto; }
+.q {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 20px 20px 16px;
+    margin: 0 0 20px;
+}
+.q h2 { margin: 0 0 4px; font-size: 1.2rem; line-height: 1.5; }
+.tag {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 0 8px;
+    border: 1px solid var(--accent);
+    border-radius: 3px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    font-size: 0.8rem;
+    font-weight: 600;
+    vertical-align: middle;
+}
+.tag.warn { border-color: var(--danger); color: var(--danger); background: var(--danger-soft); }
+.blk { margin: 14px 0; }
+.blk h3 { margin: 0 0 4px; font-size: 0.95rem; color: var(--accent); }
+.blk p { margin: 0; white-space: pre-line; }
+.blk p.fld { margin: 0 0 6px; }
+.blk p.fld.orig { padding-left: 10px; border-left: 3px solid var(--line); color: var(--muted); white-space: pre-wrap; }
+.lbl { font-weight: 600; color: var(--muted); margin-right: 0.3em; }
+.blk h4 { margin: 10px 0 4px; font-size: 1rem; }
+.draft { margin: 0 0 12px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 4px; }
+ol.topics { margin: 0 0 6px; padding-left: 1.4em; }
+.blk p.noexh { color: var(--muted); font-size: 0.92rem; }
+.meta { margin: 0 0 4px; color: var(--muted); font-size: 0.92rem; }
+.meta dt { float: left; clear: left; width: 4.5em; font-weight: 600; }
+.meta dd { margin: 0 0 6px 4.5em; white-space: pre-line; }
+figure.exh { margin: 12px 0; padding: 0; overflow-x: auto; }
+figure.exh figcaption { margin-bottom: 4px; color: var(--muted); font-size: 0.9rem; }
+figure.exh iframe { display: block; width: 100%; height: 120px; border: 1px solid var(--line); background: #fff; }
+fieldset.opts { border: 0; margin: 12px 0 0; padding: 0; }
+fieldset.opts legend { padding: 0; margin-bottom: 6px; font-weight: 600; color: var(--accent); font-size: 0.95rem; }
+label.opt {
+    display: block;
+    margin: 0 0 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    cursor: pointer;
+}
+button.clear {
+    margin: 0 0 4px;
+    padding: 2px 10px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--card);
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+label.opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+label.opt.rec { border-left: 4px solid var(--accent); }
+label.opt .name { font-weight: 600; }
+label.opt .detail { display: block; margin-top: 2px; color: var(--muted); font-size: 0.92rem; }
+.free { display: block; margin-top: 12px; font-weight: 600; }
+.free textarea {
+    display: block;
+    width: 100%;
+    min-height: 4.5em;
+    margin-top: 4px;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font: inherit;
+    font-weight: 400;
+}
+.err {
+    margin: 10px 0 0;
+    padding: 6px 10px;
+    border: 1px solid var(--danger);
+    border-radius: 4px;
+    background: var(--danger-soft);
+    color: var(--danger);
+    font-weight: 600;
+}
+.err[hidden] { display: none; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; margin-top: 8px; }
+.actions label.save { font-weight: 600; cursor: pointer; }
+.actions label.save input { margin-right: 6px; }
+.actions .note, p.save-note { color: var(--muted); font-size: 0.9rem; }
+p.save-note { margin: 6px 0 0; }
+button#send {
+    padding: 10px 28px;
+    border: 0;
+    border-radius: 4px;
+    background: var(--accent);
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+button#send:disabled { background: var(--muted); cursor: default; }
+#form-msg { margin-left: 12px; font-weight: 600; }
+:focus-visible { outline: 3px solid #e0a100; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+<form id="askui-form" novalidate>
+<!--ASKUI_QUESTIONS-->
+<div class="actions">
+    <label class="save"><input type="checkbox" id="save" data-askui-control><!--ASKUI_SAVE_LABEL--></label>
+    <span class="note">既定: チェックなし</span>
+    <!--ASKUI_SAVE_TO-->
+    <button type="submit" id="send" data-askui-control>送信</button>
+    <span id="form-msg" role="status"></span>
+</div>
+<p class="save-note">自由記入は、保存の前に機密情報の検出を行い、見つかった場合は保存から除外します</p>
+</form>
+</main>
+<script type="application/json" id="askui-meta">/*ASKUI_META*/</script>
+<script>
+/*ASKUI_FORM_LOGIC*/
+</script>
+<script>
+(function () {
+    var logic = window.AskUiFormLogic;
+    var meta = JSON.parse(document.getElementById('askui-meta').textContent);
+    var form = document.getElementById('askui-form');
+    var button = document.getElementById('send');
+    var saveBox = document.getElementById('save');
+    var message = document.getElementById('form-msg');
+
+    // 回答の送信先は、窓を開いた管理用ページに限る
+    var guard = logic.createSubmitGuard(function (payload) {
+        var text = JSON.stringify(payload);
+        if (window.opener && typeof window.opener.__askuiRecv === 'function') {
+            window.opener.__askuiRecv(text);
+        } else if (window.opener) {
+            window.opener.postMessage({ askui: text }, '*');
+        } else {
+            throw new Error('管理用ページと接続できません');
+        }
+    });
+
+    function readState() {
+        var state = {};
+        meta.questions.forEach(function (question) {
+            var section = form.querySelector('[data-qid="' + question.id + '"]');
+            var selected = [];
+            section.querySelectorAll('input[type=radio],input[type=checkbox]').forEach(function (input) {
+                if (input.checked) { selected.push(input.value); }
+            });
+            state[question.id] = { selected: selected, freeText: section.querySelector('textarea').value };
+        });
+        return state;
+    }
+
+    function showErrors(missing) {
+        meta.questions.forEach(function (question) {
+            var section = form.querySelector('[data-qid="' + question.id + '"]');
+            section.querySelector('.err').hidden = missing.indexOf(question.id) === -1;
+        });
+    }
+
+    // 表示物の枠の高さを、中身に合わせる(中身のスクリプトは sandbox で実行されない。読むのは高さだけ)
+    var MAX_EXHIBIT_HEIGHT = 520;
+    function fitFrame(frame) {
+        try {
+            var doc = frame.contentDocument;
+            if (!doc || !doc.documentElement) { return; }
+            // いったん高さを 0 にして測る(中身が縮んだときも、高さを小さくできるようにするため)
+            frame.style.height = '0px';
+            var height = Math.max(doc.documentElement.scrollHeight, doc.body ? doc.body.scrollHeight : 0) + 2;
+            frame.style.height = Math.min(Math.max(height, 60), MAX_EXHIBIT_HEIGHT) + 'px';
+        } catch (error) {
+            // 高さを読めない場合は、既定の高さのまま表示する
+        }
+    }
+    // 折りたたみ(details)の開閉で、中身の高さが変わるため、枠の高さを測り直す。
+    // toggle は、バブリングしないため、捕捉の段階で聞く。聞くだけで、中身のスクリプトは実行しない(allow-scripts を付けない)
+    function watchToggle(frame) {
+        try {
+            var doc = frame.contentDocument;
+            if (doc) { doc.addEventListener('toggle', function () { fitFrame(frame); }, true); }
+        } catch (error) {
+            // 聞けない場合は、開閉のときに高さを測り直せない(既定の高さのまま表示する)
+        }
+    }
+    var frames = Array.prototype.slice.call(document.querySelectorAll('figure.exh iframe'));
+    frames.forEach(function (frame) {
+        frame.addEventListener('load', function () { watchToggle(frame); fitFrame(frame); });
+        watchToggle(frame);
+        fitFrame(frame);
+    });
+    // 窓の幅が変わると、図や表の高さも変わるため、枠の高さを測り直す
+    var refitTimer = null;
+    window.addEventListener('resize', function () {
+        if (refitTimer !== null) { clearTimeout(refitTimer); }
+        refitTimer = setTimeout(function () { frames.forEach(fitFrame); }, 50);
+    });
+
+    // 単一選択の選択を解除する(自由記入だけで答えたい場合など)
+    form.querySelectorAll('button.clear').forEach(function (clear) {
+        clear.addEventListener('click', function () {
+            clear.closest('fieldset').querySelectorAll('input[type=radio]').forEach(function (input) {
+                input.checked = false;
+            });
+        });
+    });
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (button.disabled) { return; }
+        var result = logic.collectAnswers(meta.questions, readState());
+        if (!result.ok) {
+            showErrors(result.missing);
+            message.textContent = '回答が足りない質問があります。エラーの表示を確認してください';
+            return;
+        }
+        showErrors([]);
+        // 保存の指示は、回答に足す(送信時のチェックの状態)
+        result.payload.save = saveBox.checked;
+        try {
+            if (guard(result.payload)) {
+                button.disabled = true;
+                button.textContent = '送信済み';
+                message.textContent = '';
+            }
+        } catch (error) {
+            message.textContent = '送信に失敗しました: ' + error.message;
+        }
+    });
+}());
+</script>
+</body>
+</html>

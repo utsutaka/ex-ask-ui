@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ask-ui 管理用ページ</title>
+</head>
+<body>
+<p><!--ASKUI_ADMIN_NOTE--></p>
+<p id="askui-marker"></p>
+<pre id="askui-result" hidden></pre>
+<script>
+(function () {
+    // 目印の文字列は、ページのソースに連続して現れないように組み立てる(待機の誤検知を防ぐ)
+    var MARK_DONE = 'ASKUI_' + 'DONE';
+    var MARK_CLOSED = 'ASKUI_' + 'CLOSED';
+    var MARK_OPENFAIL = 'ASKUI_' + 'OPENFAIL';
+    var formHtml = /*ASKUI_FORM_HTML*/"";
+    // 画面の種類: question(質問)、report(報告・説明)
+    var mode = /*ASKUI_MODE*/"question";
+    // 報告・説明で、窓の × で閉じられたときに採用する保存のチェックの状態(窓から変化のたびに更新される)
+    var lastSave = /*ASKUI_DEFAULT_SAVE*/false;
+    var marker = document.getElementById('askui-marker');
+    var result = document.getElementById('askui-result');
+    var win = null;
+    var finished = false;
+    var timer = null;
+
+    function finish(mark, payloadText) {
+        if (finished) { return; }
+        finished = true;
+        if (timer !== null) { clearInterval(timer); }
+        if (payloadText !== undefined) { result.textContent = payloadText; }
+        marker.textContent = mark;
+    }
+
+    // 回答の受付。最初の 1 件だけを受け付ける
+    function receive(text) {
+        if (finished) { return; }
+        try {
+            var parsed = JSON.parse(text);
+            var expected = mode === 'report' ? 'reported' : 'answered';
+            if (!parsed || parsed.status !== expected) { return; }
+        } catch (error) {
+            return;
+        }
+        finish(MARK_DONE, text);
+        try { win.close(); } catch (error) { /* 窓を閉じられなくても、回答は受け取り済み */ }
+    }
+
+    window.__askuiRecv = receive;
+    window.__askuiState = function (save) { if (!finished) { lastSave = save === true; } };
+    window.addEventListener('message', function (event) {
+        if (event.source === win && event.data && typeof event.data.askui === 'string') {
+            receive(event.data.askui);
+        } else if (event.source === win && event.data && typeof event.data.askuiState === 'boolean') {
+            window.__askuiState(event.data.askuiState);
+        }
+    });
+
+    try {
+        win = window.open('about:blank', 'askui-form', 'width=900,height=900');
+        if (!win) { throw new Error('窓を開けませんでした'); }
+        win.document.open();
+        win.document.write(formHtml);
+        win.document.close();
+    } catch (error) {
+        finish(MARK_OPENFAIL, JSON.stringify({ status: 'openfail', message: String(error.message || error) }));
+        return;
+    }
+
+    // 窓の閉鎖を 1 秒ごとに確認する
+    timer = setInterval(function () {
+        if (win.closed) {
+            if (mode === 'report') {
+                // 報告・説明の窓の × は、「閉じる」と同じ扱い(最後のチェックの状態を採用する)
+                finish(MARK_DONE, JSON.stringify({ status: 'reported', save: lastSave, closedBy: 'window' }));
+            } else {
+                finish(MARK_CLOSED, JSON.stringify({ status: 'closed' }));
+            }
+        }
+    }, 1000);
+}());
+</script>
+</body>
+</html>

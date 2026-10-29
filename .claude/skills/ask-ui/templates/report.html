@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><!--ASKUI_PAGE_TITLE--></title>
+<style>
+:root {
+    --paper: #f6f7f9;
+    --card: #ffffff;
+    --ink: #1c2430;
+    --muted: #4d5968;
+    --line: #c9d0d9;
+    --accent: #0b5a8a;
+    --accent-soft: #e3f0f8;
+    --danger: #a3261d;
+    --danger-soft: #fbe9e7;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    padding: 24px 16px 48px;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Yu Gothic UI", "Hiragino Sans", "Meiryo", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+}
+main { max-width: 1000px; margin: 0 auto; }
+.rpt {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 20px 20px 16px;
+    margin: 0 0 20px;
+}
+.rpt h1 { margin: 0 0 4px; font-size: 1.4rem; line-height: 1.5; }
+.rpt .kind { margin: 0 0 12px; color: var(--muted); font-size: 0.9rem; }
+.tag {
+    display: inline-block;
+    padding: 0 8px;
+    border: 1px solid var(--accent);
+    border-radius: 3px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    font-size: 0.8rem;
+    font-weight: 600;
+    vertical-align: middle;
+}
+.rpt iframe { display: block; width: 100%; height: 200px; border: 1px solid var(--line); background: #fff; }
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 20px;
+    margin-top: 8px;
+}
+.actions label.save { font-weight: 600; cursor: pointer; }
+.actions label.save input { margin-right: 6px; }
+.actions .note { color: var(--muted); font-size: 0.9rem; }
+button#close {
+    padding: 10px 28px;
+    border: 0;
+    border-radius: 4px;
+    background: var(--accent);
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+button#close:disabled { background: var(--muted); cursor: default; }
+#msg { font-weight: 600; }
+:focus-visible { outline: 3px solid #e0a100; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+<article class="rpt">
+<h1><!--ASKUI_TITLE--></h1>
+<p class="kind"><span class="tag"><!--ASKUI_KIND_LABEL--></span> 回答は求めていません。読み終えたら「閉じる」を押してください</p>
+<!--ASKUI_FRAME-->
+</article>
+<div class="actions">
+    <label class="save"><input type="checkbox" id="save" data-askui-control<!--ASKUI_CHECKED-->><!--ASKUI_SAVE_LABEL--></label>
+    <span class="note" id="save-default"><!--ASKUI_DEFAULT_TEXT--></span>
+    <!--ASKUI_SAVE_TO-->
+    <button type="button" id="close" data-askui-control>閉じる</button>
+    <span id="msg" role="status"></span>
+</div>
+</main>
+<script type="application/json" id="askui-meta">/*ASKUI_META*/</script>
+<script>
+(function () {
+    var meta = JSON.parse(document.getElementById('askui-meta').textContent);
+    var checkbox = document.getElementById('save');
+    var button = document.getElementById('close');
+    var message = document.getElementById('msg');
+    var sent = false;
+
+    // 管理用ページへ、チェックの状態を伝える(窓の × で閉じられたときの根拠になる)
+    function reportState() {
+        try {
+            if (window.opener && typeof window.opener.__askuiState === 'function') {
+                window.opener.__askuiState(checkbox.checked);
+            } else if (window.opener) {
+                window.opener.postMessage({ askuiState: checkbox.checked }, '*');
+            }
+        } catch (error) {
+            // 状態を送れなくても、「閉じる」では最後の状態を送る
+        }
+    }
+    checkbox.checked = !!meta.defaultSave;
+    checkbox.addEventListener('change', reportState);
+    reportState();
+
+    // 本文の枠の高さを、中身に合わせる(上限なし。窓全体でスクロールする。中身のスクリプトは sandbox で実行されない)
+    function fitFrame(frame) {
+        try {
+            var doc = frame.contentDocument;
+            if (!doc || !doc.documentElement) { return; }
+            frame.style.height = '0px';
+            var height = Math.max(doc.documentElement.scrollHeight, doc.body ? doc.body.scrollHeight : 0) + 2;
+            frame.style.height = Math.max(height, 60) + 'px';
+        } catch (error) {
+            // 高さを読めない場合は、既定の高さのまま表示する
+        }
+    }
+    // 折りたたみ(details)の開閉で、中身の高さが変わるため、枠の高さを測り直す。
+    // toggle は、バブリングしないため、捕捉の段階で聞く。聞くだけで、中身のスクリプトは実行しない(allow-scripts を付けない)
+    function watchToggle(frame) {
+        try {
+            var doc = frame.contentDocument;
+            if (doc) { doc.addEventListener('toggle', function () { fitFrame(frame); }, true); }
+        } catch (error) {
+            // 聞けない場合は、開閉のときに高さを測り直せない(既定の高さのまま表示する)
+        }
+    }
+    var frames = Array.prototype.slice.call(document.querySelectorAll('.rpt iframe'));
+    frames.forEach(function (frame) {
+        frame.addEventListener('load', function () { watchToggle(frame); fitFrame(frame); });
+        watchToggle(frame);
+        fitFrame(frame);
+    });
+    var refitTimer = null;
+    window.addEventListener('resize', function () {
+        if (refitTimer !== null) { clearTimeout(refitTimer); }
+        refitTimer = setTimeout(function () { frames.forEach(fitFrame); }, 50);
+    });
+
+    // 「閉じる」: 結果を 1 回だけ渡す
+    button.addEventListener('click', function () {
+        if (sent) { return; }
+        var text = JSON.stringify({ status: 'reported', save: checkbox.checked, closedBy: 'button' });
+        try {
+            if (window.opener && typeof window.opener.__askuiRecv === 'function') {
+                window.opener.__askuiRecv(text);
+            } else if (window.opener) {
+                window.opener.postMessage({ askui: text }, '*');
+            } else {
+                throw new Error('管理用ページと接続できません');
+            }
+            sent = true;
+            button.disabled = true;
+            message.textContent = '';
+        } catch (error) {
+            message.textContent = '閉じる通知に失敗しました: ' + error.message;
+        }
+    });
+}());
+</script>
+</body>
+</html>
