@@ -2,8 +2,8 @@
 // 設定: .claude/settings.json の hooks.Stop に登録する
 // 判定: 返答の最後の行が、質問の形(?、ですか、ますか、でしょうか、など)で終わっているかを、文面から推定する
 // 失敗時の扱い: このスクリプト自体が失敗したときは、何も出力せず終了する(返答は止められない)
-import { appendFileSync, readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const BLOCK_REASON = '返答の最後が、利用者への質問になっています。利用者への質問は、チャットの文章ではなく、'
@@ -53,12 +53,18 @@ export function decide(input) {
     return { decision: 'block', reason: BLOCK_REASON };
 }
 
-// 観察期間中の記録: 判定の結果と、最後の行の末尾を、.temp/stop-hook.log に残す(誤判定の確認用。観察が終わったら、この関数と呼び出しを削除する)
+// 観察用の記録: 環境変数 ASKUI_HOOK_LOG にファイルのパスがあるときだけ、判定の結果と、最後の行の末尾を残す(誤判定の確認用)。
+// 相対パスは、プロジェクトのフォルダからの位置とする。未設定なら、何も書かない(場所を決め打ちにしない。観察が終わったら、この関数と呼び出しを削除する)
 function recordObservation(input, output) {
+    const target = process.env.ASKUI_HOOK_LOG;
+    if (!target) {
+        return;
+    }
     try {
-        const dir = join(process.env.CLAUDE_PROJECT_DIR ?? process.cwd(), '.temp');
+        const file = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd(), target);
+        mkdirSync(dirname(file), { recursive: true });
         const line = lastLine(input?.last_assistant_message).slice(-60);
-        appendFileSync(join(dir, 'stop-hook.log'), `${new Date().toISOString()} blocked=${output !== null} ${line}
+        appendFileSync(file, `${new Date().toISOString()} blocked=${output !== null} ${line}
 `);
     } catch {
         // 記録に失敗しても、判定には影響させない

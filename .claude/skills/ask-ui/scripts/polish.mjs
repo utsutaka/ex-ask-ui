@@ -1,10 +1,10 @@
 // yomiyasu の同梱スクリプトで、質問文の推敲(検査)を実行するスクリプト
 // 使い方: node polish.mjs <原文.txt> <最終稿.txt>
-// 記録は .temp/<作業名>/ に作り、終了時に必ず削除する(リポジトリ直下に .yomiyasu/ を作らない)
+// 記録は、原文のファイルと同じフォルダ(作業フォルダ)に作り、終了時に必ず削除する(リポジトリ直下に .yomiyasu/ を作らない)
 // 終了コード: 0 = 検査と照合が成功、1 = 検査の結果が失敗条件に当たった、3 = 推敲を実行できなかった(原文のまま表示する)、2 = 使い方の誤り
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from 'node:fs';
-import { homedir } from 'node:os';
+import { homedir, tmpdir } from 'node:os';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -112,7 +112,7 @@ function callChecker(runner, subArgs, input) {
  * 原文と最終稿を検査し、最終稿のハッシュを照合する。記録は終了時に必ず削除する
  * @param {{source: string, final: string, workRoot?: string, runner?: {command: string, args: string[]}|null}} options
  */
-export function runPolish({ source, final, workRoot = resolve('.temp'), runner = defaultRunner() }) {
+export function runPolish({ source, final, workRoot = tmpdir(), runner = defaultRunner() }) {
     if (!runner) {
         return { status: 'unavailable', message: '推敲スキル(yomiyasu)か Python が見つかりません' };
     }
@@ -144,6 +144,11 @@ export function runPolish({ source, final, workRoot = resolve('.temp'), runner =
     }
 }
 
+/** 検査の記録を作るフォルダ。原文のファイルと同じフォルダ(票の作業フォルダ)にし、場所を決め打ちにしない */
+export function workRootOf(sourcePath) {
+    return dirname(resolve(sourcePath));
+}
+
 function main(argv) {
     const [sourcePath, finalPath] = argv.slice(2);
     if (!sourcePath || !finalPath) {
@@ -159,7 +164,7 @@ function main(argv) {
         console.error(`ファイルを読み込めません: ${error.message}`);
         return 2;
     }
-    const result = runPolish({ source, final });
+    const result = runPolish({ source, final, workRoot: workRootOf(sourcePath) });
     if (result.status === 'unavailable' || result.status === 'failed') {
         console.error(`推敲を実行できませんでした。原文のまま表示してください: ${result.message}`);
         return 3;

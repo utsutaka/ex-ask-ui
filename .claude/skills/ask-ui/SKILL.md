@@ -20,7 +20,7 @@ allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/scripts/validate-input.mjs *) Bash(
 
 ## 全体の流れ
 
-1. 作業フォルダ `.temp/ask-ui-<日時>/` を作る(プロジェクト直下の `.temp/` の中。OS の temp は使わない)
+1. 作業フォルダ `<作業フォルダ>` を作り、その絶対パスを控える(場所の決め方は、下の「作業フォルダの決め方」)。以降の手順の `<作業フォルダ>` は、すべてこのパス
 2. 票 `questions.json` を書く(質問も議論も、ルートは `kind` と `items`。形は `references/board-examples.md` の例と、下の「質問の規則」「議論の規則」を参照)
 3. 必要なら文章を推敲する(下の「推敲」を参照)
 4. 票を検証する
@@ -31,6 +31,22 @@ allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/scripts/validate-input.mjs *) Bash(
 9. ページを閉じ、作業フォルダを削除する
 
 `<スキルのフォルダ>` は `${CLAUDE_SKILL_DIR}` で参照する。ユーザー名や固定のパスは書かない。
+
+## 作業フォルダの決め方
+
+票や生成物を置く一時のフォルダ(`<作業フォルダ>`)は、次の順で、最初に使えるものを選ぶ。書き込みに失敗したときは、次の候補に進む。プロジェクトの中に、場所を決め打ちにしない。
+
+1. プロジェクトの規則(`CLAUDE.md` など)に、一時ファイルの場所の指定があれば、それに従う(例: プロジェクト内の、指定されたフォルダの下の `<作業名>/`)
+2. Claude Code の scratchpad。システムプロンプトに「Scratchpad directory」としてパスが示されているときは、その下に `ask-ui-<日時>/` を作る(プロジェクトの中を汚さず、権限の確認も出ない)
+3. OS の temp フォルダ(1 と 2 が使えないとき)。次のコマンドが出力するフォルダを使う(名前に乱数が付き、ほかの利用者のフォルダと重ならない)
+
+```bash
+node -e "console.log(require('fs').mkdtempSync(require('path').join(require('os').tmpdir(), 'ask-ui-')))"
+```
+
+
+- 作ったフォルダの絶対パスを控え、以降のすべての手順で使う(`evaluate_script` の `sourcePath` も、この絶対パス)
+- 使い終わったら、必ず削除する(下の「後片付け」)。ほかの人のファイルは、消さない
 
 票のルートの `kind`(`question` または `discussion`)は、`build-pages.mjs` の引数 `--kind report|explain`(報告・説明の種別)とは別のものである。票の `kind` は、ファイルの中の項目で、引数ではない。
 
@@ -86,7 +102,7 @@ allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/scripts/validate-input.mjs *) Bash(
 
 良い例(1. 現状):
 
-> Stop フックは、返答の最後が質問の形のとき、差し戻して ask-ui で質問し直させます。2026-10-26 から、判定の結果を .temp/stop-hook.log に記録していて、432 件のうち 39 件は試験の入力でした。決定済みなのは、フックを採用する方針だけで、憲法 v2.0.0 と specs/001 の spec.md に書いてあります。記録の扱いは、まだ決まっていません。
+> Stop フックは、返答の最後が質問の形のとき、差し戻して ask-ui で質問し直させます。2026-10-26 から、判定の結果を stop-hook.log に記録していて、432 件のうち 39 件は試験の入力でした。決定済みなのは、フックを採用する方針だけで、憲法 v2.0.0 と specs/001 の spec.md に書いてあります。記録の扱いは、まだ決まっていません。
 
 悪い例(要素の書き落とし。決定済みの事項と反映先がない):
 
@@ -170,7 +186,7 @@ allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/scripts/validate-input.mjs *) Bash(
 ### 1. 検証
 
 ```bash
-node "${CLAUDE_SKILL_DIR}/scripts/validate-input.mjs" .temp/ask-ui-<日時>/questions.json
+node "${CLAUDE_SKILL_DIR}/scripts/validate-input.mjs" <作業フォルダ>/questions.json
 ```
 
 - 合格(終了コード 0)なら次へ進む。合格の行のあとに **警告** が出ることがある(`警告 N 件(票は、表示できます。…)`。mermaid の記述が、図にできないとき)。警告は、拒否ではなく、表示できる。警告が出たら、示された場所の記述を、`references/mermaid-notes.md` の条件と照らして直し、もう一度、検証する。直せない、または、直さないと決めたときは、そのまま進めてよい(表示では、図の代わりに、原文が展開される)
@@ -181,7 +197,7 @@ node "${CLAUDE_SKILL_DIR}/scripts/validate-input.mjs" .temp/ask-ui-<日時>/ques
 ### 2. ローダーの生成
 
 ```bash
-node "${CLAUDE_SKILL_DIR}/scripts/build-pages.mjs" .temp/ask-ui-<日時>/questions.json .temp/ask-ui-<日時>
+node "${CLAUDE_SKILL_DIR}/scripts/build-pages.mjs" <作業フォルダ>/questions.json <作業フォルダ>
 ```
 
 成功すると、`admin-loader.js` の絶対パスが 1 行で出力される。
@@ -224,7 +240,7 @@ node "${CLAUDE_SKILL_DIR}/scripts/build-pages.mjs" .temp/ask-ui-<日時>/questio
 
 1. `close_page` で、管理用ページを閉じる。回答の取り出し(`ASKUI_DONE`)の後も、質問用の窓が閉じられた(`ASKUI_CLOSED`)後も、同じ。質問用の窓は、回答の受け取りで自動的に閉じる。残っている場合は `list_pages` で探して閉じる
 2. 回答が `save:true` のときは、 **削除の前に** 保存する(下の「保存」)
-3. 作業フォルダ `.temp/ask-ui-<日時>/` を削除する
+3. 作業フォルダ `<作業フォルダ>` を削除する
 
 ## 中断(窓の閉鎖、接続の失敗)
 
@@ -265,9 +281,9 @@ node "${CLAUDE_SKILL_DIR}/scripts/build-pages.mjs" .temp/ask-ui-<日時>/questio
 
 調査の報告や、UI を使った説明は、文章で長く書かず、同じ仕組みの画面に表示する。回答は求めない。入力は `title` と `body`(HTML。表、図、モックを置ける)の 2 項目だけ。詳細は `references/report-and-save.md` を参照する。
 
-1. 作業フォルダ `.temp/ask-ui-<日時>/` を作り、`report.json`(`{"title": "...", "body": "<h2>...</h2>..."}`)を書く。題名と、タグを含まない文章だけ、必要なら推敲する(タグを含む本文は推敲を飛ばす)
-2. 検証: `node "${CLAUDE_SKILL_DIR}/scripts/validate-input.mjs" --report .temp/ask-ui-<日時>/report.json`(機密情報を検出したら、取り除いて作り直す。3 回まで)。本文の `<pre class="mermaid">` が図にできないときは、合格のあとに警告が出る(拒否ではない。上の「1. 検証」と同じに扱う)
-3. ローダーの生成: `node "${CLAUDE_SKILL_DIR}/scripts/build-pages.mjs" .temp/ask-ui-<日時>/report.json .temp/ask-ui-<日時> --kind report`(説明は `--kind explain`。保存先が分かっているときは `--save-to <表示用の文字>` を足す)
+1. 作業フォルダ `<作業フォルダ>` を作り(下の「作業フォルダの決め方」)、`report.json`(`{"title": "...", "body": "<h2>...</h2>..."}`)を書く。題名と、タグを含まない文章だけ、必要なら推敲する(タグを含む本文は推敲を飛ばす)
+2. 検証: `node "${CLAUDE_SKILL_DIR}/scripts/validate-input.mjs" --report <作業フォルダ>/report.json`(機密情報を検出したら、取り除いて作り直す。3 回まで)。本文の `<pre class="mermaid">` が図にできないときは、合格のあとに警告が出る(拒否ではない。上の「1. 検証」と同じに扱う)
+3. ローダーの生成: `node "${CLAUDE_SKILL_DIR}/scripts/build-pages.mjs" <作業フォルダ>/report.json <作業フォルダ> --kind report`(説明は `--kind explain`。保存先が分かっているときは `--save-to <表示用の文字>` を足す)
 4. 表示と待機: 上の「手順」の 3 と 4 と同じ。窓の題名は「ask-ui 報告」または「ask-ui 説明」。待機はバックグラウンドで続け、その間も利用者の続きの質問に答えてよい
 5. 結果の取り出し: `ASKUI_DONE` の `askui-result` は `{"status":"reported","save":<真偽値>,"closedBy":"button"|"window"}`。窓の × で閉じても `ASKUI_DONE`(`closedBy:"window"`)になり、`ASKUI_CLOSED` は出ない。ブラウザ全体の閉鎖は、保存せず、その旨をチャットで伝え、作業は止めない
 6. `save` が真なら保存する(下の「保存」)。そのあと、後片付け(上の「後片付け」)を行う
@@ -291,10 +307,10 @@ node "${CLAUDE_SKILL_DIR}/scripts/build-pages.mjs" .temp/ask-ui-<日時>/questio
 - 原文と最終稿を、それぞれテキストファイルにして、検査する
 
 ```bash
-node "${CLAUDE_SKILL_DIR}/scripts/polish.mjs" .temp/ask-ui-<日時>/source.txt .temp/ask-ui-<日時>/final.txt
+node "${CLAUDE_SKILL_DIR}/scripts/polish.mjs" <作業フォルダ>/source.txt <作業フォルダ>/final.txt
 ```
 
-- 終了コード 0: 検査と、最終稿のハッシュの照合が成功した。検査の記録は、スクリプトが `.temp/` に作り、終了時に必ず削除する(リポジトリ直下に `.yomiyasu/` を作らない)
+- 終了コード 0: 検査と、最終稿のハッシュの照合が成功した。検査の記録は、スクリプトが、原文のファイルと同じフォルダ(作業フォルダ)に作り、終了時に必ず削除する(リポジトリ直下に `.yomiyasu/` を作らない)
 - 終了コード 1: 検査の結果が失敗条件に当たった(意味が変わる恐れなど)。差分を確認し、最終稿を直す
 - 終了コード 3: 推敲を実行できなかった(スキルが動かない、Python がない、環境の制限で止まるなど)。**推敲を飛ばして原文のまま表示**し、失敗したことをチャットで伝える。質問は止めない
 
