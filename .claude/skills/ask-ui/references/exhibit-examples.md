@@ -94,7 +94,7 @@
 ### フローチャート(手順、処理の流れ)
 
 ```json
-{ "kind": "mermaid", "caption": "処理の流れ", "source": "graph LR\n  A[質問票を書く] --> B{検証}\n  B -->|合格| C[ブラウザに表示]\n  B -->|不合格| A" }
+{ "kind": "mermaid", "caption": "処理の流れ", "source": "graph TD\n  A[質問票を書く] --> B{検証}\n  B -->|合格| C[ブラウザに表示]\n  B -->|不合格| A" }
 ```
 
 ### 状態の図(状態の移り変わり)

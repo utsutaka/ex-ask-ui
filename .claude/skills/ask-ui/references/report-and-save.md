@@ -19,7 +19,7 @@
 
 ```html
 <pre class="mermaid">
-graph LR
+graph TD
   A[質問票を書く] --> B{検証}
   B -->|合格| C[ブラウザに表示]
 </pre>
