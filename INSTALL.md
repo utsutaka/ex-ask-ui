@@ -256,7 +256,7 @@ Windows では、`C:\Users\<名前>\.claude\settings.json` です。
 
 ## 5. そのほかの準備
 
-- ask-ui を使うプロジェクトの `.gitignore` に、`.temp/` を追加します(ask-ui が、作業用のフォルダを `.temp/` に作ります)
+- 作業用のフォルダは、プロジェクトの規則の指定、Claude Code の scratchpad、OS の temp の順で、最初に使えるものに作られ、使い終わると削除されます。プロジェクトの中に決め打ちの場所はないため、`.gitignore` の追加は要りません(プロジェクトの規則で、プロジェクト内のフォルダを指定した場合は、そのフォルダを `.gitignore` に追加してください)
 - chrome-devtools-mcp を、まだ入れていない場合は、本書の「1.2 依存するプラグインを入れる」で入れます
 - Claude Code を再起動します
 
