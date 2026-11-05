@@ -174,7 +174,7 @@ cp -r <取得した場所>/.claude/skills/ask-ui ~/.claude/skills/ask-ui
 
 | フック | 動くとき | 役割 | スクリプト |
 | --- | --- | --- | --- |
-| `Stop` | Claude の返答が終わったとき | 返答の最後が質問の形で終わっていたら、返答を差し戻し、ask-ui で質問し直すよう伝えます | `redirect-text-question.mjs` |
+| `Stop` | Claude の返答が終わったとき | 返答の最後が質問の形で終わっていたら、返答を差し戻し、ask-ui で質問し直すよう伝えます。ask-ui が使えないときの文章版(依頼文で終わる質問)は、差し戻されません | `redirect-text-question.mjs` |
 | `UserPromptSubmit` | 依頼を送信したとき | 報告・説明の依頼らしい送信のときだけ、ask-ui の報告・説明の手順で画面に表示するよう、注意を差し込みます(送信は止めません) | `remind-report.mjs` |
 
 - 片方だけでも動きます。`Stop` だけなら、質問の差し戻しだけが、`UserPromptSubmit` だけなら、報告・説明の起動の補助だけが働きます。どちらも、フックを入れない場合は、ask-ui は動きますが、Claude が文章や `AskUserQuestion` で質問したり、報告・説明を文章で書いたりすることがあります(起動は、確率的になります)
@@ -349,7 +349,7 @@ winget uninstall --id CoreyButler.NVMforWindows --source winget
 | 症状 | 確認すること |
 | --- | --- |
 | `/skills` に `ask-ui` が出ない | `.claude/skills/ask-ui/SKILL.md` の場所(二重のフォルダになっていないか)。Claude Code の再起動。同じ名前のスキルが、別のスコープにないか(ユーザースコープが優先されます。出典: code.claude.com の「Resolve skills that share a name」) |
-| 質問が文章で出る(画面が出ない) | `Stop` フックの設定(JSON の形、パス)。再起動したか。スキルとフックが、同じスコープに入っているか |
+| 質問が文章で出る(画面が出ない) | `Stop` フックの設定(JSON の形、パス)。再起動したか。スキルとフックが、同じスコープに入っているか。ask-ui が使えないとき(chrome-devtools の MCP サーバーが動いていない、など)は、文章版で出るのが正しい動作です |
 | フックが 2 回動く | 同じフックを、プロジェクトスコープとユーザースコープの両方に書いていないか |
 | ブラウザの窓が開かない | chrome-devtools-mcp が入っているか。窓を表示する設定か(`--headless` なし)。ポップアップのブロック |
 | `node` が見つからない | Node.js が入っているか。新しいターミナルで `node --version` を実行して確認する |
