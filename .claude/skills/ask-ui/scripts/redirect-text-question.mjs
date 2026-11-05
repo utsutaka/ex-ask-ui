@@ -1,6 +1,7 @@
 // Stop フック: Claude の返答が、質問で終わっていたら、ask-ui で質問し直すよう差し戻す
 // 設定: .claude/settings.json の hooks.Stop に登録する
 // 判定: 返答の最後の行が、質問の形(?、ですか、ますか、でしょうか、など)で終わっているかを、文面から推定する
+// 文章版(ask-ui が使えないときの質問)は、依頼文で終えるため、この判定に当たらず、差し戻されない
 // 失敗時の扱い: このスクリプト自体が失敗したときは、何も出力せず終了する(返答は止められない)
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -8,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 export const BLOCK_REASON = '返答の最後が、利用者への質問になっています。利用者への質問は、チャットの文章ではなく、'
     + 'ask-ui スキルでブラウザに表示して行ってください。文章の質問は取り除き、ask-ui で質問し直してください。'
+    + 'ask-ui が使えない場合は、ask-ui の書式を文章で表した文章版(references/text-format.md)で質問し、疑問文ではなく、依頼文(「番号で答えてください」など)で終えてください。'
     + '質問ではない場合(確認の依頼、報告、説明の終わりなど)は、質問の形で終えないよう、文を言い換えてください。';
 
 // 最後の行が、質問の形かを判定するための表現
