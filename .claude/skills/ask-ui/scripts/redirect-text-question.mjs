@@ -7,9 +7,10 @@ import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const BLOCK_REASON = '返答の最後が、利用者への質問になっています。利用者への質問は、チャットの文章ではなく、'
-    + 'ask-ui スキルでブラウザに表示して行ってください。文章の質問は取り除き、ask-ui で質問し直してください。'
-    + 'ask-ui が使えない場合は、ask-ui の書式を文章で表した文章版(references/text-format.md)で質問し、疑問文ではなく、依頼文(「番号で答えてください」など)で終えてください。'
+export const BLOCK_REASON = '返答の最後が、利用者への質問になっています。利用者への質問は、ふつうの文章ではなく、'
+    + 'ask-ui スキルの書式で行ってください。文章の質問は取り除き、ask-ui の書式で質問し直してください。'
+    + 'ブラウザでないと表示できない図表(SVG、mermaid の図、画面のモック)がつくときは、ブラウザの画面に表示します。'
+    + 'つかないとき(表と文章だけ、文字の図だけのとき)と、画面が使えないときは、ask-ui の書式を文章で表した文章版(references/text-format.md)で質問し、疑問文ではなく、依頼文(「番号で答えてください」など)で終えてください。'
     + '質問ではない場合(確認の依頼、報告、説明の終わりなど)は、質問の形で終えないよう、文を言い換えてください。';
 
 // 最後の行が、質問の形かを判定するための表現

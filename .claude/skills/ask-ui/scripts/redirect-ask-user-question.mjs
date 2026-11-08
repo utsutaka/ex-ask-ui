@@ -12,8 +12,10 @@ import { resolve } from 'node:path';
 export const FALLBACK_MARKER = 'ask-ui-fallback';
 export const MARKER_TTL_MS = 10 * 60 * 1000;
 
-export const DENY_REASON = 'AskUserQuestion は使わないでください。利用者への質問は、すべて ask-ui スキルで、ブラウザに表示して行ってください。'
-    + 'ask-ui が技術的に失敗した場合(ブラウザが使えない、窓を開けないなど)だけ、'
+export const DENY_REASON = 'AskUserQuestion は使わないでください。利用者への質問は、すべて ask-ui スキルの書式で行ってください。'
+    + 'ブラウザでないと表示できない図表がつくときは画面、つかないときは文章版で出します。'
+    + 'ask-ui の画面が技術的に失敗した場合(ブラウザが使えない、窓を開けないなど)でも、まず文章版で出してください。'
+    + 'それでも AskUserQuestion が必要な場合(利用者が指示した場合など)だけ、'
     + '作業用の一時フォルダ(scratchpad)に `ask-ui-fallback` というファイルを作ってから、AskUserQuestion を呼び直してください。';
 
 /** 目印のファイルが有効なら true を返し、目印を削除する(1 回だけ許可する)。目印は、一時フォルダの直下に置く */
