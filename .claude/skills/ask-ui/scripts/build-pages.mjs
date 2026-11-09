@@ -29,7 +29,7 @@ export const HEADINGS = {
         problem: '2. 問題点',
         ideal: '3. あるべき姿',
         recommendation: '4. 推奨',
-        options: '5. あなたの選択'
+        options: '5. 選択肢'
     },
     discussion: {
         topic: '議論したいこと',
